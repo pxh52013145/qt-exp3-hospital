@@ -1,0 +1,33 @@
+# Qt / Qt Creator
+*.pro.user
+*.user
+*.user.*
+*.autosave
+*.qmlc
+*.jsc
+
+# Build outputs
+build/
+*_build*/
+Makefile*
+ui_*.h
+moc_*.cpp
+moc_*.h
+qrc_*.cpp
+*.o
+*.obj
+*.a
+*.lib
+*.so
+*.dll
+*.exe
+
+# CMake (if any)
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+
+# OS
+.DS_Store
+Thumbs.db
+
