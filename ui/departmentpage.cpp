@@ -9,10 +9,11 @@
 #include <QLineEdit>
 #include <QMessageBox>
 #include <QPushButton>
+#include <QRegularExpression>
+#include <QSqlQuery>
 #include <QSqlRecord>
 #include <QTableView>
 #include <QVBoxLayout>
-#include <QUuid>
 
 static bool insertDepartment(const QString& id, const QString& name, QString* error)
 {
@@ -27,6 +28,32 @@ static bool updateDepartment(const QString& id, const QString& name, QString* er
 static bool deleteDepartmentById(const QString& id, QString* error)
 {
     return DbManager::instance().exec(QStringLiteral("DELETE FROM Department WHERE ID=?;"), {id}, error);
+}
+
+static QString nextSimpleId(const QString& prefix, const QString& table)
+{
+    QSqlQuery q(DbManager::instance().database());
+    q.prepare(QStringLiteral("SELECT ID FROM %1 WHERE ID LIKE ?;").arg(table));
+    q.addBindValue(prefix + QStringLiteral("%"));
+    if (!q.exec()) {
+        return prefix + QStringLiteral("1");
+    }
+
+    int maxN = 0;
+    const QRegularExpression re(QStringLiteral("^%1(\\d+)$").arg(QRegularExpression::escape(prefix)));
+    while (q.next()) {
+        const auto id = q.value(0).toString();
+        const auto m = re.match(id);
+        if (!m.hasMatch()) {
+            continue;
+        }
+        bool ok = false;
+        const int n = m.captured(1).toInt(&ok);
+        if (ok) {
+            maxN = qMax(maxN, n);
+        }
+    }
+    return prefix + QString::number(maxN + 1);
 }
 
 DepartmentPage::DepartmentPage(QWidget* parent)
@@ -86,7 +113,7 @@ int DepartmentPage::selectedRow() const
 
 void DepartmentPage::onAdd()
 {
-    const auto id = QUuid::createUuid().toString(QUuid::WithoutBraces);
+    const auto id = nextSimpleId(QStringLiteral("ks"), QStringLiteral("Department"));
     DepartmentEditDialog dlg(this);
     dlg.setWindowTitle(QStringLiteral("添加科室"));
     dlg.setDepartment(id, {});
@@ -163,4 +190,3 @@ void DepartmentPage::onDelete()
     m_model->select();
     HistoryLogger::logEvent(m_userId, QStringLiteral("删除科室：%1(%2)").arg(name, id));
 }
-

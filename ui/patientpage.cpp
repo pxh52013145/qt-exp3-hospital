@@ -12,10 +12,12 @@
 #include <QLineEdit>
 #include <QMessageBox>
 #include <QPushButton>
+#include <QRegularExpression>
+#include <QSqlError>
+#include <QSqlQuery>
 #include <QSqlRecord>
 #include <QTableView>
 #include <QVBoxLayout>
-#include <QUuid>
 
 static Patient recordToPatient(const QSqlRecord& r)
 {
@@ -72,6 +74,32 @@ static bool updatePatient(const Patient& p, QString* error)
 static bool deletePatientById(const QString& id, QString* error)
 {
     return DbManager::instance().exec(QStringLiteral("DELETE FROM Patient WHERE ID=?;"), {id}, error);
+}
+
+static QString nextSimpleId(const QString& prefix, const QString& table)
+{
+    QSqlQuery q(DbManager::instance().database());
+    q.prepare(QStringLiteral("SELECT ID FROM %1 WHERE ID LIKE ?;").arg(table));
+    q.addBindValue(prefix + QStringLiteral("%"));
+    if (!q.exec()) {
+        return prefix + QStringLiteral("1");
+    }
+
+    int maxN = 0;
+    const QRegularExpression re(QStringLiteral("^%1(\\d+)$").arg(QRegularExpression::escape(prefix)));
+    while (q.next()) {
+        const auto id = q.value(0).toString();
+        const auto m = re.match(id);
+        if (!m.hasMatch()) {
+            continue;
+        }
+        bool ok = false;
+        const int n = m.captured(1).toInt(&ok);
+        if (ok) {
+            maxN = qMax(maxN, n);
+        }
+    }
+    return prefix + QString::number(maxN + 1);
 }
 
 PatientPage::PatientPage(QWidget* parent)
@@ -137,7 +165,7 @@ int PatientPage::selectedRow() const
 void PatientPage::onAdd()
 {
     Patient p;
-    p.id = QUuid::createUuid().toString(QUuid::WithoutBraces);
+    p.id = nextSimpleId(QStringLiteral("hz"), QStringLiteral("Patient"));
     p.dob = QDate::currentDate();
 
     PatientEditDialog dlg(this);
