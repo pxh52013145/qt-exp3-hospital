@@ -48,4 +48,5 @@ private:
     QLabel* m_statusLabel = nullptr;
     QLabel* m_titleLabel = nullptr;
     QToolButton* m_userMenuButton = nullptr;
+    QAction* m_userMenuWidgetAction = nullptr;
 };

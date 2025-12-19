@@ -83,7 +83,7 @@ void MainWindow::buildUi()
     m_userMenuButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
     m_userMenuButton->setIcon(style()->standardIcon(QStyle::SP_TitleBarMenuButton));
     m_userMenuButton->setText(QStringLiteral("菜单"));
-    tb->addWidget(m_userMenuButton);
+    m_userMenuWidgetAction = tb->addWidget(m_userMenuButton);
 
     connect(m_backAction, &QAction::triggered, this, [this] { setPage(Page::Home); });
     connect(m_historyAction, &QAction::triggered, this, [this] { setPage(Page::History); });
@@ -137,6 +137,7 @@ void MainWindow::updateChrome()
     m_backAction->setVisible(loggedIn);
     m_backAction->setEnabled(m_page != Page::Home);
     m_userMenuButton->setVisible(loggedIn);
+    m_userMenuWidgetAction->setVisible(loggedIn);
 
     switch (m_page) {
     case Page::Login:
