@@ -1,7 +1,7 @@
 <RCC>
   <qresource prefix="/icons">
-    <file>icons/back.svg</file>
-    <file>icons/history.svg</file>
-    <file>icons/logout.svg</file>
+    <file alias="back.svg">icons/back.svg</file>
+    <file alias="history.svg">icons/history.svg</file>
+    <file alias="logout.svg">icons/logout.svg</file>
   </qresource>
 </RCC>
