@@ -21,14 +21,6 @@ HomePage::HomePage(QWidget* parent)
     root->setContentsMargins(40, 30, 40, 30);
     root->setSpacing(20);
 
-    auto* title = new QLabel(QStringLiteral("欢迎"), this);
-    QFont f = title->font();
-    f.setPointSize(f.pointSize() + 6);
-    f.setBold(true);
-    title->setFont(f);
-    title->setAlignment(Qt::AlignHCenter);
-    root->addWidget(title);
-
     auto* grid = new QGridLayout();
     grid->setHorizontalSpacing(40);
     grid->setVerticalSpacing(40);
@@ -52,4 +44,3 @@ HomePage::HomePage(QWidget* parent)
     connect(m_doctorBtn, &QPushButton::clicked, this, &HomePage::openDoctors);
     connect(m_departmentBtn, &QPushButton::clicked, this, &HomePage::openDepartments);
 }
-

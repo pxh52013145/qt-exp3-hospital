@@ -54,7 +54,8 @@ void MainWindow::buildUi()
     tb->setMovable(false);
     tb->setFloatable(false);
 
-    m_backAction = new QAction(QIcon(QStringLiteral(":/icons/back.svg")), QStringLiteral("返回"), this);
+    m_backAction = new QAction(QIcon(QStringLiteral(":/icons/back.svg")), QString(), this);
+    m_backAction->setToolTip(QStringLiteral("返回"));
     m_historyAction = new QAction(QIcon(QStringLiteral(":/icons/history.svg")), QStringLiteral("日志"), this);
     m_logoutAction = new QAction(QIcon(QStringLiteral(":/icons/logout.svg")), QStringLiteral("退出登录"), this);
 
@@ -77,13 +78,13 @@ void MainWindow::buildUi()
 
     m_backButton = new QToolButton(row);
     m_backButton->setDefaultAction(m_backAction);
-    m_backButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+    m_backButton->setToolButtonStyle(Qt::ToolButtonIconOnly);
 
     m_userMenuButton = new QToolButton(row);
     m_userMenuButton->setPopupMode(QToolButton::InstantPopup);
     m_userMenuButton->setMenu(menu);
-    m_userMenuButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
-    m_userMenuButton->setIcon(style()->standardIcon(QStyle::SP_TitleBarMenuButton));
+    m_userMenuButton->setToolButtonStyle(Qt::ToolButtonTextOnly);
+    m_userMenuButton->setIcon(QIcon());
     m_userMenuButton->setText(QStringLiteral("菜单"));
 
     rowLayout->addWidget(m_backButton);
