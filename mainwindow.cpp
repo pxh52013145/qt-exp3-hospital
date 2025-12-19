@@ -14,9 +14,11 @@
 #include <QStackedWidget>
 #include <QStatusBar>
 #include <QStyle>
+#include <QToolButton>
 #include <QToolBar>
 #include <QSizePolicy>
 #include <QWidget>
+#include <QMenu>
 
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent)
@@ -67,8 +69,21 @@ void MainWindow::buildUi()
     rightSpacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     tb->addWidget(rightSpacer);
 
-    m_historyAction = tb->addAction(style()->standardIcon(QStyle::SP_FileDialogInfoView), QStringLiteral("日志"));
-    m_logoutAction = tb->addAction(style()->standardIcon(QStyle::SP_DialogCloseButton), QStringLiteral("退出登录"));
+    m_historyAction = new QAction(style()->standardIcon(QStyle::SP_FileDialogInfoView), QStringLiteral("日志"), this);
+    m_logoutAction = new QAction(style()->standardIcon(QStyle::SP_DialogCloseButton), QStringLiteral("退出登录"), this);
+
+    auto* menu = new QMenu(this);
+    menu->addAction(m_historyAction);
+    menu->addSeparator();
+    menu->addAction(m_logoutAction);
+
+    m_userMenuButton = new QToolButton(this);
+    m_userMenuButton->setPopupMode(QToolButton::InstantPopup);
+    m_userMenuButton->setMenu(menu);
+    m_userMenuButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+    m_userMenuButton->setIcon(style()->standardIcon(QStyle::SP_TitleBarMenuButton));
+    m_userMenuButton->setText(QStringLiteral("菜单"));
+    tb->addWidget(m_userMenuButton);
 
     connect(m_backAction, &QAction::triggered, this, [this] { setPage(Page::Home); });
     connect(m_historyAction, &QAction::triggered, this, [this] { setPage(Page::History); });
@@ -121,8 +136,7 @@ void MainWindow::updateChrome()
     const bool loggedIn = (m_page != Page::Login);
     m_backAction->setVisible(loggedIn);
     m_backAction->setEnabled(m_page != Page::Home);
-    m_historyAction->setVisible(loggedIn);
-    m_logoutAction->setVisible(loggedIn);
+    m_userMenuButton->setVisible(loggedIn);
 
     switch (m_page) {
     case Page::Login:

@@ -13,6 +13,7 @@ class PatientPage;
 class DoctorPage;
 class DepartmentPage;
 class HistoryPage;
+class QToolButton;
 
 class MainWindow final : public QMainWindow
 {
@@ -46,4 +47,5 @@ private:
     QAction* m_logoutAction = nullptr;
     QLabel* m_statusLabel = nullptr;
     QLabel* m_titleLabel = nullptr;
+    QToolButton* m_userMenuButton = nullptr;
 };
