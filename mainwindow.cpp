@@ -9,8 +9,10 @@
 #include "ui/patientpage.h"
 
 #include <QAction>
+#include <QHBoxLayout>
 #include <QLabel>
 #include <QMessageBox>
+#include <QStackedLayout>
 #include <QStackedWidget>
 #include <QStatusBar>
 #include <QStyle>
@@ -51,39 +53,53 @@ void MainWindow::buildUi()
     auto* tb = addToolBar(QStringLiteral("Main"));
     tb->setMovable(false);
     tb->setFloatable(false);
-    tb->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
 
-    m_backAction = tb->addAction(style()->standardIcon(QStyle::SP_ArrowBack), QStringLiteral("返回"));
-
-    auto* leftSpacer = new QWidget(this);
-    leftSpacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-    tb->addWidget(leftSpacer);
-
-    m_titleLabel = new QLabel(this);
-    m_titleLabel->setAlignment(Qt::AlignCenter);
-    m_titleLabel->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
-    m_titleLabel->setStyleSheet(QStringLiteral("font-weight: 600;"));
-    tb->addWidget(m_titleLabel);
-
-    auto* rightSpacer = new QWidget(this);
-    rightSpacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-    tb->addWidget(rightSpacer);
-
-    m_historyAction = new QAction(style()->standardIcon(QStyle::SP_FileDialogInfoView), QStringLiteral("日志"), this);
-    m_logoutAction = new QAction(style()->standardIcon(QStyle::SP_DialogCloseButton), QStringLiteral("退出登录"), this);
+    m_backAction = new QAction(QIcon(QStringLiteral(":/icons/back.svg")), QStringLiteral("返回"), this);
+    m_historyAction = new QAction(QIcon(QStringLiteral(":/icons/history.svg")), QStringLiteral("日志"), this);
+    m_logoutAction = new QAction(QIcon(QStringLiteral(":/icons/logout.svg")), QStringLiteral("退出登录"), this);
 
     auto* menu = new QMenu(this);
     menu->addAction(m_historyAction);
     menu->addSeparator();
     menu->addAction(m_logoutAction);
 
-    m_userMenuButton = new QToolButton(this);
+    auto* header = new QWidget(tb);
+    header->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+
+    auto* stacked = new QStackedLayout(header);
+    stacked->setContentsMargins(0, 0, 0, 0);
+    stacked->setStackingMode(QStackedLayout::StackAll);
+
+    auto* row = new QWidget(header);
+    auto* rowLayout = new QHBoxLayout(row);
+    rowLayout->setContentsMargins(0, 0, 0, 0);
+    rowLayout->setSpacing(8);
+
+    m_backButton = new QToolButton(row);
+    m_backButton->setDefaultAction(m_backAction);
+    m_backButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+
+    m_userMenuButton = new QToolButton(row);
     m_userMenuButton->setPopupMode(QToolButton::InstantPopup);
     m_userMenuButton->setMenu(menu);
     m_userMenuButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
     m_userMenuButton->setIcon(style()->standardIcon(QStyle::SP_TitleBarMenuButton));
     m_userMenuButton->setText(QStringLiteral("菜单"));
-    m_userMenuWidgetAction = tb->addWidget(m_userMenuButton);
+
+    rowLayout->addWidget(m_backButton);
+    rowLayout->addStretch(1);
+    rowLayout->addWidget(m_userMenuButton);
+
+    m_titleLabel = new QLabel(header);
+    m_titleLabel->setAlignment(Qt::AlignCenter);
+    m_titleLabel->setStyleSheet(QStringLiteral("font-weight: 600;"));
+    m_titleLabel->setAttribute(Qt::WA_TransparentForMouseEvents, true);
+
+    stacked->addWidget(row);
+    stacked->addWidget(m_titleLabel);
+    stacked->setAlignment(m_titleLabel, Qt::AlignCenter);
+
+    tb->addWidget(header);
 
     connect(m_backAction, &QAction::triggered, this, [this] { setPage(Page::Home); });
     connect(m_historyAction, &QAction::triggered, this, [this] { setPage(Page::History); });
@@ -134,10 +150,9 @@ void MainWindow::setPage(Page p)
 void MainWindow::updateChrome()
 {
     const bool loggedIn = (m_page != Page::Login);
-    m_backAction->setVisible(loggedIn);
-    m_backAction->setEnabled(m_page != Page::Home);
+    m_backButton->setVisible(loggedIn);
+    m_backButton->setEnabled(m_page != Page::Home);
     m_userMenuButton->setVisible(loggedIn);
-    m_userMenuWidgetAction->setVisible(loggedIn);
 
     switch (m_page) {
     case Page::Login:

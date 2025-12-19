@@ -47,6 +47,6 @@ private:
     QAction* m_logoutAction = nullptr;
     QLabel* m_statusLabel = nullptr;
     QLabel* m_titleLabel = nullptr;
+    QToolButton* m_backButton = nullptr;
     QToolButton* m_userMenuButton = nullptr;
-    QAction* m_userMenuWidgetAction = nullptr;
 };

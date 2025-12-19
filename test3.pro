@@ -1,4 +1,4 @@
-QT       += core gui widgets sql
+QT       += core gui widgets sql svg
 
 CONFIG += c++17
 
@@ -45,6 +45,9 @@ HEADERS += \
     ui/loginpage.h \
     ui/patienteditdialog.h \
     ui/patientpage.h
+
+RESOURCES += \
+    resources/resources.qrc
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
