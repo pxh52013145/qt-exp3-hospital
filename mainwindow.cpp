@@ -49,6 +49,7 @@ void MainWindow::buildUi()
     auto* tb = addToolBar(QStringLiteral("Main"));
     tb->setMovable(false);
     tb->setFloatable(false);
+    tb->setToolButtonStyle(Qt::ToolButtonIconOnly);
 
     m_backAction = tb->addAction(style()->standardIcon(QStyle::SP_ArrowBack), QStringLiteral("返回"));
 
