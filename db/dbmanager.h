@@ -29,9 +29,9 @@ private:
 
     bool ensureSchema(QString* error) const;
     bool seedDefaultUser(QString* error) const;
+    bool seedDemoData(QString* error) const;
 
     QString databasePath() const;
 
     mutable QSqlDatabase m_db;
 };
-

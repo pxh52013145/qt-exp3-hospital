@@ -54,7 +54,10 @@ bool DbManager::open(QString* error)
     if (!ensureSchema(error)) {
         return false;
     }
-    return seedDefaultUser(error);
+    if (!seedDefaultUser(error)) {
+        return false;
+    }
+    return seedDemoData(error);
 }
 
 QSqlDatabase DbManager::database() const
@@ -197,3 +200,126 @@ bool DbManager::seedDefaultUser(QString* error) const
                 error);
 }
 
+static int scalarCount(QSqlDatabase db, const QString& sql, const QVariantList& args, QString* error)
+{
+    QSqlQuery q(db);
+    if (!q.prepare(sql)) {
+        if (error) {
+            *error = q.lastError().text();
+        }
+        return -1;
+    }
+    for (const auto& v : args) {
+        q.addBindValue(v);
+    }
+    if (!q.exec()) {
+        if (error) {
+            *error = q.lastError().text();
+        }
+        return -1;
+    }
+    if (!q.next()) {
+        return 0;
+    }
+    return q.value(0).toInt();
+}
+
+bool DbManager::seedDemoData(QString* error) const
+{
+    // 仅在空表时插入演示数据，避免重复污染。
+    const int deptCount = scalarCount(m_db, QStringLiteral("SELECT COUNT(1) FROM Department;"), {}, error);
+    if (deptCount < 0) {
+        return false;
+    }
+    const int doctorCount = scalarCount(m_db, QStringLiteral("SELECT COUNT(1) FROM Doctor;"), {}, error);
+    if (doctorCount < 0) {
+        return false;
+    }
+    const int patientCount = scalarCount(m_db, QStringLiteral("SELECT COUNT(1) FROM Patient;"), {}, error);
+    if (patientCount < 0) {
+        return false;
+    }
+
+    if (deptCount == 0) {
+        const struct {
+            const char* id;
+            const char* name;
+        } depts[] = {
+            {"dept-001", "内科"},
+            {"dept-002", "外科"},
+            {"dept-003", "儿科"},
+            {"dept-004", "急诊科"},
+        };
+        for (const auto& d : depts) {
+            if (!exec(QStringLiteral("INSERT OR IGNORE INTO Department(ID,NAME) VALUES(?,?);"),
+                      {QString::fromUtf8(d.id), QString::fromUtf8(d.name)},
+                      error)) {
+                return false;
+            }
+        }
+    }
+
+    if (doctorCount == 0) {
+        const struct {
+            const char* id;
+            const char* emp;
+            const char* name;
+            const char* deptId;
+        } doctors[] = {
+            {"doc-001", "D1001", "张医生", "dept-001"},
+            {"doc-002", "D1002", "李医生", "dept-002"},
+            {"doc-003", "D1003", "王医生", "dept-003"},
+            {"doc-004", "D1004", "赵医生", "dept-004"},
+        };
+        for (const auto& d : doctors) {
+            if (!exec(QStringLiteral("INSERT OR IGNORE INTO Doctor(ID,EMPLOYEENO,NAME,DEPARTMENT_ID) VALUES(?,?,?,?);"),
+                      {QString::fromUtf8(d.id),
+                       QString::fromUtf8(d.emp),
+                       QString::fromUtf8(d.name),
+                       QString::fromUtf8(d.deptId)},
+                      error)) {
+                return false;
+            }
+        }
+    }
+
+    if (patientCount == 0) {
+        const auto created = QDateTime::currentDateTime().toString(Qt::ISODate);
+        const struct {
+            const char* id;
+            const char* idCard;
+            const char* name;
+            int sex;
+            const char* dob;
+            double height;
+            double weight;
+            const char* mobile;
+            int age;
+        } patients[] = {
+            {"pat-001", "110101199801010011", "张三", 1, "1998-01-01", 175.2, 70.5, "13800000001", 27},
+            {"pat-002", "110101200203050022", "李四", 0, "2002-03-05", 162.0, 52.0, "13800000002", 23},
+            {"pat-003", "110101198912120033", "王五", 1, "1989-12-12", 180.0, 82.3, "13800000003", 35},
+            {"pat-004", "110101201506300044", "赵六", 0, "2015-06-30", 120.5, 25.0, "13800000004", 10},
+        };
+        for (const auto& p : patients) {
+            if (!exec(QStringLiteral(
+                          "INSERT OR IGNORE INTO Patient(ID,ID_CARD,NAME,SEX,DOB,HEIGHT,WEIGHT,MOBILEPHONE,AGE,CREATEDTIMESTAMP)"
+                          " VALUES(?,?,?,?,?,?,?,?,?,?);"),
+                      {QString::fromUtf8(p.id),
+                       QString::fromUtf8(p.idCard),
+                       QString::fromUtf8(p.name),
+                       p.sex,
+                       QString::fromUtf8(p.dob),
+                       p.height,
+                       p.weight,
+                       QString::fromUtf8(p.mobile),
+                       p.age,
+                       created},
+                      error)) {
+                return false;
+            }
+        }
+    }
+
+    return true;
+}
