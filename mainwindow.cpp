@@ -49,7 +49,7 @@ void MainWindow::buildUi()
     auto* tb = addToolBar(QStringLiteral("Main"));
     tb->setMovable(false);
     tb->setFloatable(false);
-    tb->setToolButtonStyle(Qt::ToolButtonIconOnly);
+    tb->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
 
     m_backAction = tb->addAction(style()->standardIcon(QStyle::SP_ArrowBack), QStringLiteral("返回"));
 
@@ -57,12 +57,17 @@ void MainWindow::buildUi()
     leftSpacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     tb->addWidget(leftSpacer);
 
-    m_historyAction = tb->addAction(style()->standardIcon(QStyle::SP_FileDialogDetailedView), QStringLiteral("操作记录"));
+    m_titleLabel = new QLabel(this);
+    m_titleLabel->setAlignment(Qt::AlignCenter);
+    m_titleLabel->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
+    m_titleLabel->setStyleSheet(QStringLiteral("font-weight: 600;"));
+    tb->addWidget(m_titleLabel);
 
     auto* rightSpacer = new QWidget(this);
     rightSpacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     tb->addWidget(rightSpacer);
 
+    m_historyAction = tb->addAction(style()->standardIcon(QStyle::SP_FileDialogInfoView), QStringLiteral("日志"));
     m_logoutAction = tb->addAction(style()->standardIcon(QStyle::SP_DialogCloseButton), QStringLiteral("退出登录"));
 
     connect(m_backAction, &QAction::triggered, this, [this] { setPage(Page::Home); });
@@ -118,6 +123,27 @@ void MainWindow::updateChrome()
     m_backAction->setEnabled(m_page != Page::Home);
     m_historyAction->setVisible(loggedIn);
     m_logoutAction->setVisible(loggedIn);
+
+    switch (m_page) {
+    case Page::Login:
+        m_titleLabel->setText(QStringLiteral("登录"));
+        break;
+    case Page::Home:
+        m_titleLabel->setText(QStringLiteral("欢迎"));
+        break;
+    case Page::Patients:
+        m_titleLabel->setText(QStringLiteral("患者管理"));
+        break;
+    case Page::Doctors:
+        m_titleLabel->setText(QStringLiteral("医生管理"));
+        break;
+    case Page::Departments:
+        m_titleLabel->setText(QStringLiteral("科室管理"));
+        break;
+    case Page::History:
+        m_titleLabel->setText(QStringLiteral("日志"));
+        break;
+    }
 
     const auto userText = loggedIn
         ? QStringLiteral("当前用户：%1（%2）").arg(m_user.fullName.isEmpty() ? m_user.username : m_user.fullName, m_user.username)

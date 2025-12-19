@@ -45,4 +45,5 @@ private:
     QAction* m_historyAction = nullptr;
     QAction* m_logoutAction = nullptr;
     QLabel* m_statusLabel = nullptr;
+    QLabel* m_titleLabel = nullptr;
 };
