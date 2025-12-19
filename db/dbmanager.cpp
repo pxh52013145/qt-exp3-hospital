@@ -240,15 +240,23 @@ bool DbManager::seedDemoData(QString* error) const
         return false;
     }
 
-    if (deptCount == 0) {
+    const int hasSimpleDeptIds = scalarCount(m_db,
+                                            QStringLiteral("SELECT COUNT(1) FROM Department WHERE ID IN ('ks1','ks2','ks3','ks4');"),
+                                            {},
+                                            error);
+    if (hasSimpleDeptIds < 0) {
+        return false;
+    }
+
+    if (deptCount == 0 || hasSimpleDeptIds == 0) {
         const struct {
             const char* id;
             const char* name;
         } depts[] = {
-            {"dept-001", "内科"},
-            {"dept-002", "外科"},
-            {"dept-003", "儿科"},
-            {"dept-004", "急诊科"},
+            {"ks1", "内科"},
+            {"ks2", "外科"},
+            {"ks3", "儿科"},
+            {"ks4", "急诊科"},
         };
         for (const auto& d : depts) {
             if (!exec(QStringLiteral("INSERT OR IGNORE INTO Department(ID,NAME) VALUES(?,?);"),
@@ -259,17 +267,25 @@ bool DbManager::seedDemoData(QString* error) const
         }
     }
 
-    if (doctorCount == 0) {
+    const int hasSimpleDoctorIds = scalarCount(m_db,
+                                              QStringLiteral("SELECT COUNT(1) FROM Doctor WHERE ID IN ('ys1','ys2','ys3','ys4');"),
+                                              {},
+                                              error);
+    if (hasSimpleDoctorIds < 0) {
+        return false;
+    }
+
+    if (doctorCount == 0 || hasSimpleDoctorIds == 0) {
         const struct {
             const char* id;
             const char* emp;
             const char* name;
             const char* deptId;
         } doctors[] = {
-            {"doc-001", "D1001", "张医生", "dept-001"},
-            {"doc-002", "D1002", "李医生", "dept-002"},
-            {"doc-003", "D1003", "王医生", "dept-003"},
-            {"doc-004", "D1004", "赵医生", "dept-004"},
+            {"ys1", "YS001", "张医生", "ks1"},
+            {"ys2", "YS002", "李医生", "ks2"},
+            {"ys3", "YS003", "王医生", "ks3"},
+            {"ys4", "YS004", "赵医生", "ks4"},
         };
         for (const auto& d : doctors) {
             if (!exec(QStringLiteral("INSERT OR IGNORE INTO Doctor(ID,EMPLOYEENO,NAME,DEPARTMENT_ID) VALUES(?,?,?,?);"),
@@ -283,7 +299,15 @@ bool DbManager::seedDemoData(QString* error) const
         }
     }
 
-    if (patientCount == 0) {
+    const int hasSimplePatientIds = scalarCount(m_db,
+                                               QStringLiteral("SELECT COUNT(1) FROM Patient WHERE ID IN ('hz1','hz2','hz3','hz4');"),
+                                               {},
+                                               error);
+    if (hasSimplePatientIds < 0) {
+        return false;
+    }
+
+    if (patientCount == 0 || hasSimplePatientIds == 0) {
         const auto created = QDateTime::currentDateTime().toString(Qt::ISODate);
         const struct {
             const char* id;
@@ -296,10 +320,10 @@ bool DbManager::seedDemoData(QString* error) const
             const char* mobile;
             int age;
         } patients[] = {
-            {"pat-001", "110101199801010011", "张三", 1, "1998-01-01", 175.2, 70.5, "13800000001", 27},
-            {"pat-002", "110101200203050022", "李四", 0, "2002-03-05", 162.0, 52.0, "13800000002", 23},
-            {"pat-003", "110101198912120033", "王五", 1, "1989-12-12", 180.0, 82.3, "13800000003", 35},
-            {"pat-004", "110101201506300044", "赵六", 0, "2015-06-30", 120.5, 25.0, "13800000004", 10},
+            {"hz1", "110101199801010011", "张三", 1, "1998-01-01", 175.2, 70.5, "13800000001", 27},
+            {"hz2", "110101200203050022", "李四", 0, "2002-03-05", 162.0, 52.0, "13800000002", 23},
+            {"hz3", "110101198912120033", "王五", 1, "1989-12-12", 180.0, 82.3, "13800000003", 35},
+            {"hz4", "110101201506300044", "赵六", 0, "2015-06-30", 120.5, 25.0, "13800000004", 10},
         };
         for (const auto& p : patients) {
             if (!exec(QStringLiteral(
