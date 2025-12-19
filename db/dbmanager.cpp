@@ -33,7 +33,7 @@ QString DbManager::databasePath() const
 
 bool DbManager::open(QString* error)
 {
-    const QString connectionName = QStringLiteral("main");
+    const QString connectionName = QSqlDatabase::defaultConnection;
     if (QSqlDatabase::contains(connectionName)) {
         m_db = QSqlDatabase::database(connectionName);
     } else {
