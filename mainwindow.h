@@ -42,7 +42,6 @@ private:
     HistoryPage* m_history = nullptr;
 
     QAction* m_backAction = nullptr;
-    QAction* m_homeAction = nullptr;
     QAction* m_historyAction = nullptr;
     QAction* m_logoutAction = nullptr;
     QLabel* m_statusLabel = nullptr;

@@ -15,11 +15,13 @@
 #include <QStatusBar>
 #include <QStyle>
 #include <QToolBar>
+#include <QSizePolicy>
+#include <QWidget>
 
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent)
 {
-    setWindowTitle(AppInfo::kAppTitle);
+    setWindowTitle(QStringLiteral("%1 - %2 %3").arg(AppInfo::kAppTitle, AppInfo::kStudentId, AppInfo::kStudentName));
     resize(1000, 650);
     buildUi();
     setPage(Page::Login);
@@ -49,13 +51,20 @@ void MainWindow::buildUi()
     tb->setFloatable(false);
 
     m_backAction = tb->addAction(style()->standardIcon(QStyle::SP_ArrowBack), QStringLiteral("返回"));
-    m_homeAction = tb->addAction(style()->standardIcon(QStyle::SP_DesktopIcon), QStringLiteral("主页"));
+
+    auto* leftSpacer = new QWidget(this);
+    leftSpacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+    tb->addWidget(leftSpacer);
+
     m_historyAction = tb->addAction(style()->standardIcon(QStyle::SP_FileDialogDetailedView), QStringLiteral("操作记录"));
-    tb->addSeparator();
+
+    auto* rightSpacer = new QWidget(this);
+    rightSpacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+    tb->addWidget(rightSpacer);
+
     m_logoutAction = tb->addAction(style()->standardIcon(QStyle::SP_DialogCloseButton), QStringLiteral("退出登录"));
 
     connect(m_backAction, &QAction::triggered, this, [this] { setPage(Page::Home); });
-    connect(m_homeAction, &QAction::triggered, this, [this] { setPage(Page::Home); });
     connect(m_historyAction, &QAction::triggered, this, [this] { setPage(Page::History); });
     connect(m_logoutAction, &QAction::triggered, this, &MainWindow::onLogout);
 
@@ -104,8 +113,8 @@ void MainWindow::setPage(Page p)
 void MainWindow::updateChrome()
 {
     const bool loggedIn = (m_page != Page::Login);
-    m_backAction->setVisible(loggedIn && m_page != Page::Home);
-    m_homeAction->setVisible(loggedIn && m_page != Page::Home);
+    m_backAction->setVisible(loggedIn);
+    m_backAction->setEnabled(m_page != Page::Home);
     m_historyAction->setVisible(loggedIn);
     m_logoutAction->setVisible(loggedIn);
 
